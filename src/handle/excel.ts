@@ -12,7 +12,9 @@ async function saveExcel(data: any): Promise<any> {
     { header: "Precio", key: "price" },
     { header: "Puntuacion", key: "score" },
     { header: "Categoria", key: "category" },
-    { header: "Range Price", key: "range" }
+    { header: "Range Price", key: "range" },
+    { header: "CheckIn", key: "checkin" },
+    { header: "CheckOut", key: "checkout" }
   ];
 
   sheet.columns = reColumns;
