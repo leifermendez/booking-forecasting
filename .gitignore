@@ -1,5 +1,5 @@
 node_modules/
-src/data/*
+src/data/.xlsx
 !src/data/.gitkeep
 *.env
 .env
