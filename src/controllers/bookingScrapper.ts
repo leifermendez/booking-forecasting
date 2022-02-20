@@ -70,7 +70,7 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
         }, domLinkTitle);
   
         const getPriceValue = await page.evaluate(
-          (domPriceAndDiscounted) => domPriceAndDiscounted.innerText,
+          (domPriceAndDiscounted) => domPriceAndDiscounted.innerText.replace(' ','').split('€').join(' - '),
           domPriceAndDiscounted
         );
   
