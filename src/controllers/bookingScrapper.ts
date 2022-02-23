@@ -3,32 +3,34 @@ dotenv.config();
 
 import saveExcel from "../handle/excel";
 import puppeteer from "puppeteer";
+import fullPageScreenshot from "puppeteer-full-page-screenshot";
 import { builderUrl } from "./bookingHandle";
 import { insertRow } from "../handle/supabase";
 import { parseUrl } from "../services/proxy";
 
-const TIME_OUT = Number(process.env.TIME_OUT) * 1000
+const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
 
 const CONFIG_PUPPETER = {
   headless: true,
   args: [
-    '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
-    '--window-size=1200,800',
-    '--incognito',
+    "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+    "--window-size=1200,800",
+    "--incognito",
     "--disable-gpu",
     "--disable-dev-shm-usage",
     "--disable-setuid-sandbox",
-    "--no-sandbox"
-  ]
-}
+    "--no-sandbox",
+  ],
+};
 
 /**
  * Visite page wit puppeteer
  * @param url
  */
-async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initDay:number}): Promise<any> {
-
-
+async function viewPage(
+  type: 50 | 100 | 150 | 200,
+  config: { adults: number; initDay: number }
+): Promise<any> {
   const urlWithProxy = builderUrl(type, config.adults, config.initDay);
   const browser = await puppeteer.launch(CONFIG_PUPPETER);
   const context = await browser.createIncognitoBrowserContext();
@@ -37,13 +39,13 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
   page.setDefaultTimeout(TIME_OUT);
   await page.setViewport({ width: 1920, height: 1080 });
 
-  async function scrapperOnly(urlClean:string): Promise<any> {
+  async function scrapperOnly(urlClean: string): Promise<any> {
     let data: Array<any> = [];
-    try{
+    try {
       urlClean = parseUrl(urlClean);
       await page.goto(urlClean); //TODO la url de bookin
       await page.waitForSelector("div[data-component=arp-properties-list]");
-  
+
       const domElements = await page.$$("div[data-testid=property-card]");
       const [domPagination] = await page.$x(
         '//div[@data-testid="pagination"]/nav/div'
@@ -61,31 +63,35 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
         const domRecommended = await child.$(
           'div[data-testid="recommended-units"]'
         );
-  
+
         const getLink = await page.evaluate(
           (domLinkTitle) => domLinkTitle.getAttribute("href"),
           domLinkTitle
         );
-  
+
         const getRecommended = await page.evaluate(
           (domRecommended) => domRecommended.innerText,
           domRecommended
         );
-  
+
         const getScore = await page.evaluate((domScore) => {
           return domScore?.querySelector("div").innerText;
         }, domScore);
-  
+
         const getName = await page.evaluate((domLinkTitle) => {
           return domLinkTitle?.querySelector('div[data-testid="title"]')
             .innerText;
         }, domLinkTitle);
-  
+
         const getPriceValue = await page.evaluate(
-          (domPriceAndDiscounted) => domPriceAndDiscounted.innerText.replace(' ','').split('€').join(' - '),
+          (domPriceAndDiscounted) =>
+            domPriceAndDiscounted.innerText
+              .replace(" ", "")
+              .split("€")
+              .join(" - "),
           domPriceAndDiscounted
         );
-  
+
         const { checkIn, checkOut } = urlWithProxy.dates;
         data.push({
           name: getName,
@@ -93,56 +99,56 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
           price: getPriceValue,
           score: getScore,
           category: getRecommended,
-          range:type,
+          range: type,
           checkin: [checkIn.day, checkIn.month, checkIn.year].join("/"),
           checkout: [checkOut.day, checkOut.month, checkOut.year].join("/"),
         });
       }
 
-      saveData(data);
+      saveData(data, `Adult_${config.adults}_InitDay_${config.initDay}`);
       await page.waitForSelector("div[data-testid=pagination]");
       await page.waitForTimeout(2500);
       const button = await domPagination.$$("button");
-  
+
       //TODO Boton ultimo de la paginacion
-      
+
       // await page.waitForTimeout(222500);
-      const buttonOnClick = button[button.length -1];
-      buttonOnClick.getProperty('disabled')
-      const isDisabled = await (await buttonOnClick.getProperty('disabled')).jsonValue()
-      await button[button.length -1].click();
-  
+      const buttonOnClick = button[button.length - 1];
+      buttonOnClick.getProperty("disabled");
+      const isDisabled = await (
+        await buttonOnClick.getProperty("disabled")
+      ).jsonValue();
+      await button[button.length - 1].click();
+
       //TODO Esperamos que cargue la nueva pagina y obtener la url para volver a scraper
       await page.waitForSelector("div[data-component=arp-properties-list]");
       const nextUrl = page.url();
       const existNextPage = urlWithProxy.url !== nextUrl;
       const returnData = { existNextPage, nextUrl };
-      if(isDisabled) {
+      if (isDisabled) {
+        await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
         browser.close();
-        console.log('Cerrando Browse')
-        return 
+        console.log("Cerrando Browse");
       }
-      if(returnData.existNextPage) scrapperOnly(returnData.nextUrl);
+      if (returnData.existNextPage) scrapperOnly(returnData.nextUrl);
       return Promise.resolve(returnData);
-    }catch(e){
+    } catch (e) {
+      console.log("Error cerramos puppeter", e);
       browser.close();
-      console.log('Error cerramos puppeter',e )
-      return Promise.reject(null)
-    } 
-
+      return Promise.reject(null);
+    }
   }
 
   return scrapperOnly(urlWithProxy.url);
- 
 }
-
 
 /**
  * Save data
  */
 
-function saveData(data:any):void{
-  console.log('Guarando data...')
+function saveData(data: any, msg:string): void {
+  console.log("Saving data...");
+  console.log(msg);
   // saveExcel(data);
   insertRow(data);
 }

@@ -2,13 +2,14 @@ import Queue from "bull";
 import scrapperProccess from "../processes/scrapper.queue";
 import { Filter } from "../types/filter.type";
 
-const scrapperQueue = new Queue("scrapper_queue_list", 'redis://redis:6380');
+const scrapperQueue = new Queue("scrapper_queue_list", process.env.REDIS_URL);
 
 scrapperQueue.process(scrapperProccess);
 
 function sendScrapperQueue(data: Filter): any {
   console.log("Se agrega a cola", data);
-  scrapperQueue.add({ range: data.range, adults: 1 });
+  const { initDay, adults } = data;
+  scrapperQueue.add({ range: data.range, adults, initDay });
 }
 
 export { sendScrapperQueue };
