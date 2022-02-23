@@ -5,5 +5,6 @@ export interface Apartament {
   score: string | number;
   checkin: string;
   checkout: string;
-  link:string
+  link:string,
+  range:string
 }

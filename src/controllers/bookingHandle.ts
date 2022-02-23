@@ -59,7 +59,7 @@ function builderUrl(type:50 | 100| 150 | 200, adults: number, initDay: number): 
     `&nflt=${privacyType[type]}`,
   ].join("");
 
-  const url = parseUrl(originaUrl);
+  const url = originaUrl;
   return {
       url,
       dates: checkDates

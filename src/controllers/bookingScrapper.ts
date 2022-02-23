@@ -1,14 +1,24 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import saveExcel from "../handle/excel";
 import puppeteer from "puppeteer";
 import { builderUrl } from "./bookingHandle";
 import { insertRow } from "../handle/supabase";
+import { parseUrl } from "../services/proxy";
 
+const TIME_OUT = Number(process.env.TIME_OUT) * 1000
 
 const CONFIG_PUPPETER = {
   headless: true,
   args: [
     '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
-    '--window-size=1200,800'
+    '--window-size=1200,800',
+    '--incognito',
+    "--disable-gpu",
+    "--disable-dev-shm-usage",
+    "--disable-setuid-sandbox",
+    "--no-sandbox"
   ]
 }
 
@@ -21,16 +31,18 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
 
   const urlWithProxy = builderUrl(type, config.adults, config.initDay);
   const browser = await puppeteer.launch(CONFIG_PUPPETER);
-  const page = await browser.newPage();
-  page.setDefaultTimeout(40000);
+  const context = await browser.createIncognitoBrowserContext();
+  const page = await context.newPage();
+
+  page.setDefaultTimeout(TIME_OUT);
   await page.setViewport({ width: 1920, height: 1080 });
 
   async function scrapperOnly(urlClean:string): Promise<any> {
     let data: Array<any> = [];
     try{
-      await page.goto(urlClean);
+      urlClean = parseUrl(urlClean);
+      await page.goto(urlClean); //TODO la url de bookin
       await page.waitForSelector("div[data-component=arp-properties-list]");
-      await page.waitForSelector("div[data-testid=pagination]");
   
       const domElements = await page.$$("div[data-testid=property-card]");
       const [domPagination] = await page.$x(
@@ -87,6 +99,8 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
         });
       }
 
+      saveData(data);
+      await page.waitForSelector("div[data-testid=pagination]");
       await page.waitForTimeout(2500);
       const button = await domPagination.$$("button");
   
@@ -102,11 +116,10 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
       await page.waitForSelector("div[data-component=arp-properties-list]");
       const nextUrl = page.url();
       const existNextPage = urlWithProxy.url !== nextUrl;
-      saveExcel(data);
-      insertRow(data);
       const returnData = { existNextPage, nextUrl };
       if(isDisabled) {
         browser.close();
+        console.log('Cerrando Browse')
         return 
       }
       if(returnData.existNextPage) scrapperOnly(returnData.nextUrl);
@@ -119,8 +132,19 @@ async function viewPage(type: 50 | 100 | 150 | 200, config:{adults:number, initD
 
   }
 
-  await scrapperOnly(urlWithProxy.url);
+  return scrapperOnly(urlWithProxy.url);
  
+}
+
+
+/**
+ * Save data
+ */
+
+function saveData(data:any):void{
+  console.log('Guarando data...')
+  // saveExcel(data);
+  insertRow(data);
 }
 
 export { viewPage };
