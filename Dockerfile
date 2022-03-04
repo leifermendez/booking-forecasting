@@ -17,11 +17,11 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Puppeteer v10.0.0 works with Chromium 92.
+COPY . .
 RUN yarn add puppeteer@10.0.0
 
 RUN yarn global add nodemon ts-node typescript
 RUN yarn install
 
-COPY . .
 RUN yarn run build
 CMD ["yarn", "run", "start"]
