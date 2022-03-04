@@ -10,10 +10,10 @@ function scrapperProccess(job: Job, done: DoneCallback):void {
       done();
     })
     .catch(() => {
-      done(new Error('error scrapper'));
+      done(new Error('ERROR_BOOKING'));
     })
   } catch (e) {
-    done(new Error('error scrapper'));
+    done(new Error('ERROR_PROCCESS'));
   }
 };
 

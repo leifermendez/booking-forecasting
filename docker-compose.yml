@@ -5,6 +5,7 @@ services:
   redis:
     image: redis
     container_name: tutorial_redis
+    restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     command: --port 6380
@@ -26,6 +27,7 @@ services:
     container_name: tutorial_backend
     build:
       context: ./
+    restart: on-failure
     environment:
       REDIS_URL: redis://redis:6380
       CHOKIDAR_USEPOLLING: 'true'
