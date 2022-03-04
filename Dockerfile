@@ -21,8 +21,7 @@ RUN yarn add puppeteer@10.0.0
 
 RUN yarn global add nodemon ts-node typescript
 RUN yarn install
-RUN yarn run build
 
 COPY . .
-
+RUN yarn run build
 CMD ["yarn", "run", "start"]
