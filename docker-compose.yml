@@ -35,6 +35,6 @@ services:
     ports:
      - 5000:5000
     volumes:
-      - ./:/var/app
+      - ./src:/var/app/src
     depends_on:
       - redis
