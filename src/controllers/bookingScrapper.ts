@@ -93,7 +93,7 @@ async function viewPage(
         const { checkIn, checkOut } = urlWithProxy.dates;
         data.push({
           name: getName,
-          link: getLink,
+          link: '',
           price: getCleanPrice,
           score: getScore,
           category: getRecommended,
