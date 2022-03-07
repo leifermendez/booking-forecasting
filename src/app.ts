@@ -1,31 +1,32 @@
-import { viewPage } from "./controllers/bookingScrapper";
-import cron from "node-cron";
-import dotenv from "dotenv";
-dotenv.config();
-
+import { Filter } from "./types/filter.type";
+import express from "express";
+import { sendScrapperQueue } from "./queues/scrapper.queue";
+const PORT = process.env.PORT || 5000;
+const app = express();
+app.use(express.json());
 /**
  * This is main function
  */
 
-function init(): void {
+// app.post("/scrapper", (req, res) => {
+//   const body: Filter = req.body;
+//   sendScrapperQueue(body);
+//   const data = { status: "ok", msg: "Job to queue" };
+//   res.send(data);
+// });
 
-  //TODO Cada dia 1AM
-  cron.schedule("0 1 * * *", () => {
-    viewPage(50, { adults: 1, initDay: 1 });
+/**
+ *
+ */
+app.post("/scrapper-week", (req, res) => {
+  const body: Filter = req.body;
+
+  [1, 2, 3, 4, 5, 6, 7].forEach((day) => {
+    const mergeFilter = { ...body, ...{ initDay: day } };
+    sendScrapperQueue(mergeFilter);
   });
+  const data = { status: "ok", msg: "Job to queue Week" };
+  res.send(data);
+});
 
-  cron.schedule("15 1 * * *", () => {
-    viewPage(100, { adults: 1, initDay: 1 });
-  });
-
-  cron.schedule("35 1 * * *", () => {
-    viewPage(150, { adults: 1, initDay: 1 });
-  });
-
-  cron.schedule("0 2 * * *", () => {
-    viewPage(200, { adults: 1, initDay: 1 });
-  });
-
-}
-
-init();
+app.listen(PORT, () => console.log(`App running on port ${PORT}`));

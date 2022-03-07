@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+
+  redis:
+    image: redis
+    container_name: tutorial_redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    command: --port 6380
+    ports:
+      - "6380:6380"
+    expose:
+      - "6380"
+
+  redis-commander:
+    container_name: tutorial_redis-commander
+    image: rediscommander/redis-commander
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6380
+    ports:
+      - "8081:8081"
+
+  server:
+    container_name: tutorial_backend
+    build:
+      context: ./
+    restart: on-failure
+    environment:
+      REDIS_URL: redis://redis:6380
+      CHOKIDAR_USEPOLLING: 'true'
+      CHOKIDAR_INTERVAL: 1000
+    ports:
+     - 5000:5000
+    volumes:
+      - ./src:/var/app/src
+    depends_on:
+      - redis

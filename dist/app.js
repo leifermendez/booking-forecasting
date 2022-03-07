@@ -1,42 +1,33 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const puppeteer = __importStar(require("puppeteer"));
-function init() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const urlWithProxy = 'https://google.com';
-        const browser = yield puppeteer.launch();
-        const page = yield browser.newPage();
-        yield page.setViewport({ width: 1920, height: 1080 });
-        yield page.goto(urlWithProxy);
+const express_1 = __importDefault(require("express"));
+const scrapper_queue_1 = require("./queues/scrapper.queue");
+const PORT = process.env.PORT || 5000;
+const app = (0, express_1.default)();
+app.use(express_1.default.json());
+/**
+ * This is main function
+ */
+// app.post("/scrapper", (req, res) => {
+//   const body: Filter = req.body;
+//   sendScrapperQueue(body);
+//   const data = { status: "ok", msg: "Job to queue" };
+//   res.send(data);
+// });
+/**
+ *
+ */
+app.post("/scrapper-week", (req, res) => {
+    const body = req.body;
+    [1, 2, 3, 4, 5, 6, 7].forEach((day) => {
+        const mergeFilter = Object.assign(Object.assign({}, body), { initDay: day });
+        (0, scrapper_queue_1.sendScrapperQueue)(mergeFilter);
     });
-}
-init();
+    const data = { status: "ok", msg: "Job to queue Week" };
+    res.send(data);
+});
+app.listen(PORT, () => console.log(`App running on port ${PORT}`));
 //# sourceMappingURL=app.js.map

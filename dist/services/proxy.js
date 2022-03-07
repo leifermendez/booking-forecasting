@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseUrl = exports.callHttp = void 0;
 const request_promise_1 = __importDefault(require("request-promise"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 /**
  * Function parse url and concat
  * @param url
@@ -21,7 +23,12 @@ const request_promise_1 = __importDefault(require("request-promise"));
  */
 function parseUrl(url) {
     const SCRAPER_API = process.env.SCRAPER_API || null;
-    const preUrl = `http://api.scraperapi.com/?api_key=${SCRAPER_API}&url=${url}`;
+    const PRE_LINK = `http://api.scraperapi.com/?api_key=${SCRAPER_API}&url=`;
+    url = url.replace(PRE_LINK, '');
+    //http://api.scraperapi.com/?api_key=5b29a4a2839ddd2f7b47c51949de4985&url=http://httpbin.org/ip
+    let preUrl = (process.env.SCRAPER_API.length) ? `${PRE_LINK}${url}` : url;
+    // const preUrl = `${url}`;
+    // console.log(preUrl)
     return preUrl;
 }
 exports.parseUrl = parseUrl;

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./dist/app.js",
-    "dev": "ts-node ./src/app.ts",
+    "dev": "nodemon ./src/app.ts",
     "build": "tsc -p .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,6 +23,7 @@
     "@types/request-promise": "^4.1.48"
   },
   "dependencies": {
+    "@bull-board/api": "^3.10.0",
     "@supabase/supabase-js": "^1.30.4",
     "bull": "^4.5.5",
     "bull-board": "^2.1.3",
@@ -33,6 +34,7 @@
     "express": "^4.17.3",
     "node-cron": "^3.0.0",
     "puppeteer": "^13.3.2",
+    "puppeteer-full-page-screenshot": "^1.2.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"
   }
