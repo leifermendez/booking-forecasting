@@ -1,12 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
-
-import saveExcel from "../handle/excel";
 import puppeteer from "puppeteer";
 import fullPageScreenshot from "puppeteer-full-page-screenshot";
 import { builderUrl } from "./bookingHandle";
 import { insertRow } from "../handle/supabase";
 import { parseUrl } from "../services/proxy";
+import getAmount from "../handle/getAmount";
 
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
 
@@ -86,17 +85,16 @@ async function viewPage(
         const getPriceValue = await page.evaluate(
           (domPriceAndDiscounted) =>
             domPriceAndDiscounted.innerText
-              .replace(" ", "")
-              .split("€")
-              .join(" - "),
+              .replace(/( )|(-)|(€)|(USD)|\s/g,'_'),
           domPriceAndDiscounted
         );
 
+        const [getCleanPrice] = getAmount(getPriceValue);
         const { checkIn, checkOut } = urlWithProxy.dates;
         data.push({
           name: getName,
           link: getLink,
-          price: getPriceValue,
+          price: getCleanPrice,
           score: getScore,
           category: getRecommended,
           range: type,
