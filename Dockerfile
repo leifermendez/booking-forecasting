@@ -24,4 +24,3 @@ RUN yarn global add nodemon ts-node typescript
 RUN yarn install
 
 RUN yarn run build
-CMD ["yarn", "run", "start"]
