@@ -1,11 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
 import puppeteer from "puppeteer";
+// @ts-ignore
 import fullPageScreenshot from "puppeteer-full-page-screenshot";
 import { builderUrl } from "./bookingHandle";
-import { insertRow } from "../handle/supabase";
 import { parseUrl } from "../services/proxy";
 import getAmount from "../handle/getAmount";
+import saveData from "../handle/save";
+import ScrapperData from '../types/scrapper-data.type'
+import { format } from "date-fns";
 
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
 
@@ -39,7 +42,7 @@ async function viewPage(
   await page.setViewport({ width: 1920, height: 1080 });
 
   async function scrapperOnly(urlClean: string): Promise<any> {
-    let data: Array<any> = [];
+    let data: ScrapperData[] = [];
     try {
       urlClean = parseUrl(urlClean);
       await page.goto(urlClean); //TODO la url de bookin
@@ -84,8 +87,10 @@ async function viewPage(
 
         const getPriceValue = await page.evaluate(
           (domPriceAndDiscounted) =>
-            domPriceAndDiscounted.innerText
-              .replace(/( )|(-)|(€)|(USD)|\s/g,'_'),
+            domPriceAndDiscounted.innerText.replace(
+              /( )|(-)|(€)|(USD)|\s/g,
+              "_"
+            ),
           domPriceAndDiscounted
         );
 
@@ -93,13 +98,14 @@ async function viewPage(
         const { checkIn, checkOut } = urlWithProxy.dates;
         data.push({
           name: getName,
-          link: '',
           price: getCleanPrice,
           score: getScore,
           category: getRecommended,
           range: type,
           checkin: [checkIn.day, checkIn.month, checkIn.year].join("/"),
           checkout: [checkOut.day, checkOut.month, checkOut.year].join("/"),
+          source: "Booking",
+          dateScrapper: format(new Date(), "dd/MM/yyyy"),
         });
       }
 
@@ -138,17 +144,6 @@ async function viewPage(
   }
 
   return scrapperOnly(urlWithProxy.url);
-}
-
-/**
- * Save data
- */
-
-function saveData(data: any, msg:string): void {
-  console.log("Saving data...");
-  console.log(msg);
-  // saveExcel(data);
-  insertRow(data);
 }
 
 export { viewPage };

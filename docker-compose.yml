@@ -32,9 +32,11 @@ services:
       REDIS_URL: redis://redis:6380
       CHOKIDAR_USEPOLLING: 'true'
       CHOKIDAR_INTERVAL: 1000
+      PORT: 5000
     ports:
      - 5000:5000
     volumes:
       - ./src:/var/app/src
+    command: ["yarn", "run","dev"]
     depends_on:
       - redis
