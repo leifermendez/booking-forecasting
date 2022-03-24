@@ -1,20 +1,10 @@
 import { Filter } from "./types/filter.type";
 import express from "express";
 import { sendScrapperQueue } from "./queues/scrapper.queue";
-import saveGoogle from "./handle/google.excel";
+import { scrapperAirbnb } from "./controllers/airbnbScrapper"
 const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
-/**
- * This is main function
- */
-
-// app.post("/scrapper", (req, res) => {
-//   const body: Filter = req.body;
-//   sendScrapperQueue(body);
-//   const data = { status: "ok", msg: "Job to queue" };
-//   res.send(data);
-// });
 
 /**
  *

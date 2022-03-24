@@ -29,11 +29,11 @@ const CONFIG_PUPPETER = {
  * Visite page wit puppeteer
  * @param url
  */
-async function viewPage(
+async function scrapperBooking(
   type: 50 | 100 | 150 | 200,
   config: { adults: number; initDay: number }
 ): Promise<any> {
-  const urlWithProxy = builderUrl(type, config.adults, config.initDay);
+  const urlWithProxy = builderUrl(type, config.adults, config.initDay, 'booking');
   const browser = await puppeteer.launch(CONFIG_PUPPETER);
   const context = await browser.createIncognitoBrowserContext();
   const page = await context.newPage();
@@ -104,7 +104,7 @@ async function viewPage(
           range: type,
           checkin: [checkIn.day, checkIn.month, checkIn.year].join("/"),
           checkout: [checkOut.day, checkOut.month, checkOut.year].join("/"),
-          source: "Booking",
+          source: "booking",
           dateScrapper: format(new Date(), "dd/MM/yyyy"),
         });
       }
@@ -146,4 +146,4 @@ async function viewPage(
   return scrapperOnly(urlWithProxy.url);
 }
 
-export { viewPage };
+export { scrapperBooking };

@@ -1,45 +1,27 @@
-import { bookingUrl } from "../types/bookingUrl.type";
+import { datesCheckInOut } from "../types/checkInOut.type";
 import { parseUrl } from "../services/proxy";
 import { add, format } from "date-fns";
 
-
 /**
- * 
- * @param type 
- * @param adults 
- * @param initDay 
- * @returns 
+ *
+ * @param checkDates
+ * @param adults
+ * @param type
+ * @returns
  */
-function builderUrl(type:50 | 100| 150 | 200, adults: number, initDay: number): { url: string; dates: bookingUrl } {
-  const checkInDate = format(add(new Date(), { days: initDay }), "d/L/y").split(
-    "/"
-  );
-  const checkOutDate = format(
-    add(new Date(), { days: initDay + 1 }),
-    "d/L/y"
-  ).split("/");
-
-  const checkDates: bookingUrl = {
-    checkIn: {
-      day: checkInDate[0],
-      month: checkInDate[1],
-      year: checkInDate[2],
-    },
-    checkOut: {
-      day: checkOutDate[0],
-      month: checkOutDate[1],
-      year: checkOutDate[2],
-    },
-  };
-
+function builderUrlBooking(
+  checkDates: datesCheckInOut,
+  adults: number,
+  type: number
+): string {
   const { checkIn, checkOut } = checkDates;
 
   const privacyType = {
-      50:'privacy_type%3D3%3Bpri%3D1',
-      100:'privacy_type%3D3%3Bpri%3D2',
-      150:'privacy_type%3D3%3Bpri%3D3',
-      200:'privacy_type%3D3%3Bpri%3D4',
-  }
+    50: "privacy_type%3D3%3Bpri%3D1",
+    100: "privacy_type%3D3%3Bpri%3D2",
+    150: "privacy_type%3D3%3Bpri%3D3",
+    200: "privacy_type%3D3%3Bpri%3D4",
+  };
 
   const originaUrl = [
     `https://www.booking.com/searchresults.es.html?`,
@@ -59,10 +41,89 @@ function builderUrl(type:50 | 100| 150 | 200, adults: number, initDay: number): 
     `&nflt=${privacyType[type]}`,
   ].join("");
 
+  return originaUrl;
+}
+
+/**
+ *
+ * @param checkDates
+ * @param adults
+ * @param type
+ * @returns
+ */
+function builderUrlAirbnb(
+  checkDates: datesCheckInOut,
+  adults: number,
+  type: number
+): string {
+  const { checkIn, checkOut } = checkDates;
+
+  const room_types = {
+    entery: "Entire%20home%2Fapt",
+    100: "privacy_type%3D3%3Bpri%3D2",
+    150: "privacy_type%3D3%3Bpri%3D3",
+    200: "privacy_type%3D3%3Bpri%3D4",
+  };
+
+  const originaUrl = [
+    `https://www.airbnb.es/s/Madrid/homes`,
+    `?date_picker_type=calendar&query=Madrid`,
+    `&place_id=ChIJgTwKgJcpQg0RaSKMYcHeNsQ&`,
+    `checkin=${checkIn.year}-${checkIn.month}-${checkIn.day}&checkout=${checkOut.year}-${checkOut.month}-${checkOut.day}`,
+    `&adults=${adults}&price_max=300&property_type_id%5B%5D=1`,
+    `&room_types%5B%5D=Entire%20home%2Fapt&search_type=filter_change`,
+  ].join("");
+
+  return originaUrl;
+}
+
+/**
+ *
+ * @param type
+ * @param adults
+ * @param initDay
+ * @returns
+ */
+function builderUrl(
+  type: 50 | 100 | 150 | 200,
+  adults: number,
+  initDay: number,
+  source: "booking" | "airbnb"
+): { url: string; dates: datesCheckInOut } {
+  const checkInDate = format(add(new Date(), { days: initDay }), "d/L/y").split(
+    "/"
+  );
+  const checkOutDate = format(
+    add(new Date(), { days: initDay + 1 }),
+    "d/L/y"
+  ).split("/");
+
+  const checkDates: datesCheckInOut = {
+    checkIn: {
+      day: checkInDate[0],
+      month: checkInDate[1],
+      year: checkInDate[2],
+    },
+    checkOut: {
+      day: checkOutDate[0],
+      month: checkOutDate[1],
+      year: checkOutDate[2],
+    },
+  };
+
+  let originaUrl = "";
+
+  if (source === "booking") {
+    originaUrl = builderUrlBooking(checkDates, adults, type);
+  }
+  if (source === "airbnb") {
+    originaUrl = builderUrlAirbnb(checkDates, adults, type);
+  }
+
   const url = originaUrl;
   return {
-      url,
-      dates: checkDates
+    url,
+    dates: checkDates,
   };
 }
 

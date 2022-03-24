@@ -8,13 +8,15 @@ scrapperQueue.process(scrapperProccess);
 
 function sendScrapperQueue(data: Filter): any {
   console.log("Se agrega a cola", data);
-  const { initDay, adults } = data;
-  scrapperQueue.add(
-    { range: data.range, adults, initDay },
-    {
-      attempts: 2,
-    }
-  );
+  const { initDay, adults, source = undefined } = data;
+  if (source) {
+    scrapperQueue.add(
+      { range: data.range, adults, initDay },
+      {
+        attempts: 2,
+      }
+    );
+  }
 }
 
 export { sendScrapperQueue };
