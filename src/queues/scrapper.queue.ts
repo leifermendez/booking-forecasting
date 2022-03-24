@@ -11,7 +11,7 @@ function sendScrapperQueue(data: Filter): any {
   const { initDay, adults, source = undefined } = data;
   if (source) {
     scrapperQueue.add(
-      { range: data.range, adults, initDay },
+      { range: data.range, adults, initDay, source },
       {
         attempts: 2,
       }
