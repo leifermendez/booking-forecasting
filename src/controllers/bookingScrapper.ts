@@ -12,6 +12,7 @@ import { format } from "date-fns";
 
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
 const PATH_TMP = `${process.cwd()}/tmp`
+const PROXY = process.env.SCRAPER_PROXY || null;
 
 const CONFIG_PUPPETER = {
   headless: process.env.DEBUG === 'false',
@@ -23,6 +24,7 @@ const CONFIG_PUPPETER = {
     "--disable-dev-shm-usage",
     "--disable-setuid-sandbox",
     "--no-sandbox",
+    `${PROXY ? PROXY : ''}`,
   ],
 };
 

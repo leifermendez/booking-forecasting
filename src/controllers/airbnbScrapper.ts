@@ -10,10 +10,11 @@ import ScrapperData from "../types/scrapper-data.type";
 import { format } from "date-fns";
 
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
-const PATH_TMP = `${process.cwd()}/tmp`
+const PATH_TMP = `${process.cwd()}/tmp`;
+const PROXY = process.env.SCRAPER_PROXY || null;
 
 const CONFIG_PUPPETER = {
-  headless: process.env.DEBUG === 'false',
+  headless: process.env.DEBUG === "false",
   args: [
     "--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
     "--window-size=1200,800",
@@ -22,9 +23,10 @@ const CONFIG_PUPPETER = {
     "--disable-dev-shm-usage",
     "--disable-setuid-sandbox",
     "--no-sandbox",
+    "--ignore-certificate-errors",
+    `${PROXY ? PROXY : ''}`,
   ],
 };
-
 /**
  * Visite page wit puppeteer
  * @param url
@@ -115,7 +117,9 @@ async function scrapperAirbnb(
       }
 
       if (isDisabled) {
-        await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
+        await fullPageScreenshot(page, {
+          path: `${PATH_TMP}/${Date.now()}.png`,
+        });
         browser.close();
         console.log("Cerrando Browse", isDisabled);
       }
