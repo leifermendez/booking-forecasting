@@ -12,7 +12,7 @@ import { format } from "date-fns";
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
 
 const CONFIG_PUPPETER = {
-  headless: process.env.DEBUG !== 'false',
+  headless: process.env.DEBUG !== 'true',
   args: [
     "--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
     "--window-size=1200,800",
@@ -49,7 +49,8 @@ async function scrapperAirbnb(
     let data: ScrapperData[] = [];
     try {
       urlClean = parseUrl(urlClean);
-      await page.goto(urlClean); //TODO la url de bookin
+      await page.goto(urlClean);
+      await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
       await page.waitForSelector(
         "div[data-plugin-in-point-id^=PAGINATED_HOMES-ExploreSectionWrapper]"
       );
