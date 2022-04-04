@@ -37,6 +37,7 @@ services:
      - 5000:5000
     volumes:
       - ./src:/var/app/src
+      - ./tmp:/var/app/tmp
     command: ["yarn", "run","start"]
     depends_on:
       - redis
