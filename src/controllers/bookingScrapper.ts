@@ -11,6 +11,7 @@ import ScrapperData from '../types/scrapper-data.type'
 import { format } from "date-fns";
 
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
+const PATH_TMP = `${process.cwd()}/tmp`
 
 const CONFIG_PUPPETER = {
   headless: process.env.DEBUG === 'false',
@@ -130,14 +131,14 @@ async function scrapperBooking(
       const existNextPage = urlWithProxy.url !== nextUrl;
       const returnData = { existNextPage, nextUrl };
       if (isDisabled) {
-        await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
+        await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
         browser.close();
         console.log("Cerrando Browse");
       }
       if (returnData.existNextPage) scrapperOnly(returnData.nextUrl);
       return Promise.resolve(returnData);
     } catch (e) {
-      await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
+      await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
       console.log("Error cerramos puppeter", e);
       browser.close();
       return Promise.reject(null);

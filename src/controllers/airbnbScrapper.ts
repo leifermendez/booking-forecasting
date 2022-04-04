@@ -10,6 +10,7 @@ import ScrapperData from "../types/scrapper-data.type";
 import { format } from "date-fns";
 
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
+const PATH_TMP = `${process.cwd()}/tmp`
 
 const CONFIG_PUPPETER = {
   headless: process.env.DEBUG === 'false',
@@ -50,7 +51,7 @@ async function scrapperAirbnb(
     try {
       urlClean = parseUrl(urlClean);
       await page.goto(urlClean);
-      await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
+      await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
       await page.waitForSelector(
         "div[data-plugin-in-point-id^=PAGINATED_HOMES-ExploreSectionWrapper]"
       );
@@ -114,7 +115,7 @@ async function scrapperAirbnb(
       }
 
       if (isDisabled) {
-        await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
+        await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
         browser.close();
         console.log("Cerrando Browse", isDisabled);
       }
@@ -131,7 +132,7 @@ async function scrapperAirbnb(
 
       return Promise.resolve(null);
     } catch (e) {
-      await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
+      await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
       console.log("Error cerramos puppeter", e);
       browser.close();
       return Promise.reject(null);
