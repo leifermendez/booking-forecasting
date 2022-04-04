@@ -139,7 +139,7 @@ async function scrapperBooking(
       return Promise.resolve(returnData);
     } catch (e) {
       await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
-      console.log("Error cerramos puppeter", e);
+      console.log(`Error cerramos puppeter ${PATH_TMP}`, e);
       browser.close();
       return Promise.reject(null);
     }
