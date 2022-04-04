@@ -13,7 +13,7 @@ import { format } from "date-fns";
 const TIME_OUT = Number(process.env.TIME_OUT) * 1000;
 
 const CONFIG_PUPPETER = {
-  headless: true,
+  headless: process.env.DEBUG !== 'false',
   args: [
     "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
     "--window-size=1200,800",
@@ -137,6 +137,7 @@ async function scrapperBooking(
       if (returnData.existNextPage) scrapperOnly(returnData.nextUrl);
       return Promise.resolve(returnData);
     } catch (e) {
+      await fullPageScreenshot(page, { path: `./tmp/${Date.now()}.png` });
       console.log("Error cerramos puppeter", e);
       browser.close();
       return Promise.reject(null);
