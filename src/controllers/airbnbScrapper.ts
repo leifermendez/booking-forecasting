@@ -133,7 +133,7 @@ async function scrapperAirbnb(
       return Promise.resolve(null);
     } catch (e) {
       await fullPageScreenshot(page, { path: `${PATH_TMP}/${Date.now()}.png` });
-      console.log("Error cerramos puppeter", e);
+      console.log(`Error cerramos puppeter ${PATH_TMP}`, e);
       browser.close();
       return Promise.reject(null);
     }
